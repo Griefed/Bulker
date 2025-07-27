@@ -9,7 +9,7 @@ No Patrick, Mayonnaise is not an instrument.
 
 ## How-To-Use
 
-1. Run the app using Java 21, `java -jar Bulker-1.0-SNAPSHOT-all.jar`
+1. Run the app using Java 21, `java -jar Bulker-<VERSION>-all.jar` where `<VERSION>` is the version you downloaded
 2. Drag-and-drop files and/or directories into the field on the left. All files from directories are added recursively.
 3. Enter the search-text into `Search For` in the top left.
 4. Enter the replacement-text into `Replace With` in the top right.
