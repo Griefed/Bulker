@@ -84,7 +84,7 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <component id="62d76" class="DroppableList" binding="inputFileList">
+                      <component id="8e90" class="JDroppableList" binding="inputFileList">
                         <constraints/>
                         <properties/>
                       </component>

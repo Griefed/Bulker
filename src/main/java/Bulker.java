@@ -1,13 +1,13 @@
+import de.griefed.CustomCellRenderer;
+import de.griefed.CustomDocumentListener;
+import de.griefed.DroppableList;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -31,10 +31,10 @@ public class Bulker extends JFrame {
     private JButton runBulkRenameButton;
     private JButton resetFileSelectionButton;
     private JScrollPane outputListScroller;
-    private DroppableList inputFileList;
     private JScrollPane inputScrollPane;
     private JSplitPane bulkerSplitPane;
     private JPanel controlPanel;
+    private JDroppableList inputFileList;
 
     public Bulker() {
         setTitle("Bulker - Bulk File Renamer");
@@ -49,7 +49,7 @@ public class Bulker extends JFrame {
 
         pack();
         setLocationRelativeTo(null);
-        bulkerSplitPane.setDividerLocation(this.getWidth()/2);
+        bulkerSplitPane.setDividerLocation(this.getWidth() / 2);
 
         setVisible(true);
     }
@@ -97,7 +97,7 @@ public class Bulker extends JFrame {
                 List<File> renamed = renameFiles();
                 JOptionPane.showMessageDialog(this,
                         "The renamed files have been added to the bottom of the file-input.\n" +
-                        "In case you want to further rename them.",
+                                "In case you want to further rename them.",
                         "Renamed " + renamed.size() + " file(s) successfully!",
                         JOptionPane.INFORMATION_MESSAGE);
             }
@@ -129,17 +129,17 @@ public class Bulker extends JFrame {
             }
         }
         for (Hashtable table : inputTables) {
-            File oldFile =  new File(table.get("path").toString());
+            File oldFile = new File(table.get("path").toString());
             String parentPath = oldFile.getParentFile().getAbsolutePath();
             String fileName = oldFile.getName();
             String newFilename = fileName.replace(searchFor, replaceWith);
-            File destinationFile = new File(parentPath,newFilename);
+            File destinationFile = new File(parentPath, newFilename);
             int i = 1;
             while (destinationFile.exists()) {
-                destinationFile = new File(parentPath,newFilename + " (" + i + ")");
+                destinationFile = new File(parentPath, newFilename + " (" + i + ")");
             }
             try {
-                FileUtils.moveFile(oldFile,destinationFile);
+                FileUtils.moveFile(oldFile, destinationFile);
                 if (destinationFile.exists()) {
                     renamedFiles.add(destinationFile);
                     ((DefaultListModel) inputFileList.getModel()).removeElement(table);
@@ -177,7 +177,7 @@ public class Bulker extends JFrame {
             String oldFilename = hashtable.get("name").toString();
             String oldFilepath = hashtable.get("path").toString();
             String newFilename = oldFilename.replace(inputSearchTextField.getText(), outputReplaceTextField.getText());
-            String newFilepath = oldFilepath.substring(0,oldFilepath.length()-oldFilename.length()) + newFilename;
+            String newFilepath = oldFilepath.substring(0, oldFilepath.length() - oldFilename.length()) + newFilename;
             inputFileNames.add(newFilename + " ==> " + newFilepath);
         }
 

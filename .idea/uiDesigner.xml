@@ -124,6 +124,12 @@
       <item class="DroppableList" icon="/com/intellij/uiDesigner/icons/list.svg" removable="true" auto-create-binding="true" can-attach-label="false">
         <default-constraints vsize-policy="7" hsize-policy="7" anchor="0" fill="3" />
       </item>
+      <item class="de.griefed.DroppableList" icon="/com/intellij/uiDesigner/icons/list.svg" removable="true" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="7" hsize-policy="7" anchor="0" fill="3" />
+      </item>
+      <item class="JDroppableList" icon="/com/intellij/uiDesigner/icons/list.svg" removable="true" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="7" hsize-policy="7" anchor="0" fill="3" />
+      </item>
     </group>
   </component>
   <component name="uidesigner-configuration">
