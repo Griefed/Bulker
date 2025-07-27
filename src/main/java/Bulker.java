@@ -42,6 +42,7 @@ public class Bulker extends JFrame {
 
     public Bulker() {
         setTitle("Bulker - Bulk File Renamer");
+        setIconImage(Toolkit.getDefaultToolkit().getImage(Bulker.class.getResource("bulker-icon.png")));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setContentPane(applicationPanel);
 
@@ -51,15 +52,15 @@ public class Bulker extends JFrame {
 
         setSize(800, 500);
 
-        pack();
-        setLocationRelativeTo(null);
-        bulkerSplitPane.setDividerLocation(this.getWidth() / 2);
-
         FlatDraculaIJTheme.setup();
         FlatJetBrainsMonoFont.install();
         FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
         UIManager.put("defaultFont", new FontUIResource(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, 12));
         FlatDraculaIJTheme.updateUI();
+
+        pack();
+        setLocationRelativeTo(null);
+        bulkerSplitPane.setDividerLocation(this.getWidth() / 2);
     }
 
     private void modifyInputList() {
