@@ -1,11 +1,15 @@
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.fonts.jetbrains_mono.FlatJetBrainsMonoFont;
+import com.formdev.flatlaf.intellijthemes.FlatDraculaIJTheme;
 import de.griefed.CustomCellRenderer;
 import de.griefed.CustomDocumentListener;
-import de.griefed.DroppableList;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.plaf.FontUIResource;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +55,11 @@ public class Bulker extends JFrame {
         setLocationRelativeTo(null);
         bulkerSplitPane.setDividerLocation(this.getWidth() / 2);
 
-        setVisible(true);
+        FlatDraculaIJTheme.setup();
+        FlatJetBrainsMonoFont.install();
+        FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+        UIManager.put("defaultFont", new FontUIResource(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, 12));
+        FlatDraculaIJTheme.updateUI();
     }
 
     private void modifyInputList() {
