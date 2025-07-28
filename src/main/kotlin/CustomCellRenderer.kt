@@ -6,12 +6,12 @@ import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
 import javax.swing.ListCellRenderer
 
-class CustomCellRenderer : ListCellRenderer<Any> {
+class CustomCellRenderer<Any> : ListCellRenderer<Any> {
     var listCellRenderer: DefaultListCellRenderer = DefaultListCellRenderer()
 
     override fun getListCellRendererComponent(
-        list: JList<out Any?>?,
-        value: Any?,
+        list: JList<out Any>,
+        value: Any,
         index: Int,
         isSelected: Boolean,
         cellHasFocus: Boolean
@@ -21,7 +21,7 @@ class CustomCellRenderer : ListCellRenderer<Any> {
         return listCellRenderer
     }
 
-    private fun getValueString(value: Any?): String {
+    private fun getValueString(value: Any): String {
         var returnString = "null"
         if (value != null) {
             if (value is Hashtable<*, *>) {
