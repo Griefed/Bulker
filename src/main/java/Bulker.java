@@ -106,7 +106,4 @@ public class Bulker {
     protected JDroppableList getInputFileList() {
         return inputFileList;
     }
-
-    public Bulker() {
-    }
 }

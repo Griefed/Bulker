@@ -19,14 +19,15 @@ import javax.swing.plaf.FontUIResource
 
 class BulkerKt : Bulker() {
 
-    private val frame = JFrame("Bulker - Bulk File Renamer")
+    private var frame: JFrame? = null
     private val docListener = CustomDocumentListener(this)
 
-    init {
-        frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        frame.iconImage = Toolkit.getDefaultToolkit().getImage( this.javaClass.getResource("/bulker-icon.png"))
-        frame.preferredSize = Dimension(920, 590)
-        frame.contentPane = applicationPanel
+    fun initGui() {
+        frame = JFrame("Bulker - Bulk File Renamer")
+        frame!!.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+        frame!!.iconImage = Toolkit.getDefaultToolkit().getImage(this.javaClass.getResource("/bulker-icon.png"))
+        frame!!.preferredSize = Dimension(920, 590)
+        frame!!.contentPane = applicationPanel
 
         FlatDraculaIJTheme.setup()
         FlatJetBrainsMonoFont.install()
@@ -34,8 +35,8 @@ class BulkerKt : Bulker() {
         UIManager.put("defaultFont", FontUIResource(FlatJetBrainsMonoFont.FAMILY, Font.PLAIN, 12))
         FlatDraculaIJTheme.updateUI()
 
-        frame.pack()
-        frame.setLocationRelativeTo(null)
+        frame!!.pack()
+        frame!!.setLocationRelativeTo(null)
         bulkerSplitPane.dividerLocation = 450
 
         modifyInputList()
@@ -44,7 +45,7 @@ class BulkerKt : Bulker() {
     }
 
     fun makeVisible() {
-        frame.isVisible = true
+        frame!!.isVisible = true
     }
 
     private fun modifyInputList() {
@@ -76,21 +77,25 @@ class BulkerKt : Bulker() {
         runBulkRenameButton.addActionListener { e: ActionEvent? ->
             val result = JOptionPane.showConfirmDialog(
                 frame,
-                """This will rename every file which contains:
+                """
+                    This will rename every file which contains:
                     ${inputSearchTextField.text}
                     Approximately ${countPotentialRenames()} files will be renamed.
                     Are you ABSOLUTELY sure about this?
-                    This operation CAN NOT be undone!""",
+                    This operation CAN NOT be undone!
+                    """.trimIndent(),
                 "Run Rename Operation?",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE
             )
             if (result == JOptionPane.YES_OPTION) {
-                val renamed = renameFiles()
+                val renamed = renameFiles(inputSearchTextField.text, outputReplaceTextField.text, getFileList())
                 JOptionPane.showMessageDialog(
                     frame,
-                    "The renamed files have been added to the bottom of the file-input.\n" +
-                            "In case you want to further rename them.",
+                    """
+                        The renamed files have been added to the bottom of the file-input.
+                        In case you want to further rename them.
+                        """.trimIndent(),
                     "Renamed " + renamed.size + " file(s) successfully!",
                     JOptionPane.INFORMATION_MESSAGE
                 )
@@ -110,22 +115,12 @@ class BulkerKt : Bulker() {
         }
     }
 
-    private fun renameFiles(): MutableList<File> {
-        val inputs = (inputFileList.model as DefaultListModel<Any>).elements().asIterator()
-        val inputTables = ArrayList<Hashtable<Any, Any>>()
+    fun renameFiles(searchFor: String, replaceWith: String, files: List<File>): MutableList<File> {
         val renamedFiles = ArrayList<File>()
-        val searchFor = inputSearchTextField.text
-        val replaceWith = outputReplaceTextField.text
-        while (inputs.hasNext()) {
-            val hashtable = inputs.next() as Hashtable<Any, Any>
-            val fileName = hashtable["name"].toString()
-            if (fileName.contains(searchFor)) {
-                inputTables.add(hashtable)
-            }
-        }
-        for (table in inputTables) {
-            val oldFile = File(table["path"].toString())
-            val parentPath = oldFile.parentFile.absolutePath
+        val parsedFiles = files.filter { file -> file.name.contains(searchFor) }
+        for (file in parsedFiles) {
+            val oldFile = file.absoluteFile
+            val parentPath = file.parentFile.absolutePath
             val fileName = oldFile.name
             val newFilename = fileName.replace(searchFor, replaceWith)
             var destinationFile = File(parentPath, newFilename)
@@ -137,14 +132,35 @@ class BulkerKt : Bulker() {
                 FileUtils.moveFile(oldFile, destinationFile)
                 if (destinationFile.exists()) {
                     renamedFiles.add(destinationFile)
-                    (inputFileList.model as DefaultListModel<Any>).removeElement(table)
-                    (inputFileList.model as DefaultListModel<Any>).addAll(inputFileList.buildHashtable(destinationFile))
+                    if (frame?.isVisible ?: false) {
+                        (inputFileList.model as DefaultListModel<Any>).removeElement(
+                            hashMapOf<Any, Any>(
+                                "name" to oldFile.name,
+                                "path" to oldFile.absolutePath
+                            )
+                        )
+                        (inputFileList.model as DefaultListModel<Any>).addAll(
+                            inputFileList.buildHashtable(
+                                destinationFile
+                            )
+                        )
+                    }
                 }
             } catch (ex: IOException) {
                 throw RuntimeException(ex)
             }
         }
         return renamedFiles
+    }
+
+    private fun getFileList(): List<File> {
+        val inputs = (inputFileList.model as DefaultListModel<Any>).elements().asIterator()
+        val files = ArrayList<File>()
+        while (inputs.hasNext()) {
+            val hashtable = inputs.next() as Hashtable<Any, Any>
+            files.add(File(hashtable["path"].toString()))
+        }
+        return files
     }
 
     fun countPotentialRenames(): Int {
