@@ -1,13 +1,14 @@
 package de.griefed
 
-import java.io.File
 import javax.swing.SwingUtilities
 import kotlin.system.exitProcess
 
 /**
- * --search, singular
- * --replace, singular
- * --input, multiple
+ * --search, singular, cannot be empty
+ * --replace, singular, cannot be empty
+ * --input, multiple, at least one, cannot be empty
+ * --include-mask, singular, can be empty
+ * --exclude-mask, singular, can be empty
  */
 fun main(args: Array<String>) {
     val bulker = BulkerKt()
@@ -22,10 +23,12 @@ fun main(args: Array<String>) {
             exitProcess(1)
         }
 
-        val search = getSearchFor(args)
-        val replace = getReplaceWith(args)
-        val files = getInputs(args)
-        val renamed = bulker.renameFiles(search, replace, files)
+        val search = bulker.getSearchFor(args)
+        val replace = bulker.getReplaceWith(args)
+        val files = bulker.getInputs(args)
+        val includeMask = bulker.getIncludeMask(args)
+        val excludeMask = bulker.getExcludeMask(args)
+        val renamed = bulker.renameFiles(search, replace, files, includeMask, excludeMask)
         println("Renamed the following files:")
         renamed.forEach {
             println(it)
@@ -37,38 +40,4 @@ fun main(args: Array<String>) {
             bulker.makeVisible()
         }
     }
-}
-
-fun getSearchFor(args: Array<String>): String {
-    val searchPos = args.indexOf("--search")
-    return args[searchPos + 1]
-}
-
-fun getReplaceWith(args: Array<String>): String {
-    val searchPos = args.indexOf("--replace")
-    return args[searchPos + 1]
-}
-
-fun getInputs(args: Array<String>): List<File> {
-    val files = mutableListOf<File>()
-    val inputPositions = mutableListOf<Int>()
-    for (i in args.indices) {
-        if (args[i] == "--input") {
-            inputPositions.add(i + 1)
-        }
-    }
-    for (i in inputPositions) {
-        val file = File(args[i])
-        if (file.isFile) {
-            files.add(file)
-        }
-        if (file.isDirectory) {
-            file.walk(FileWalkDirection.TOP_DOWN).forEach { walked ->
-                if (walked.isFile) {
-                    files.add(walked)
-                }
-            }
-        }
-    }
-    return files
 }
