@@ -10,14 +10,14 @@ import javax.swing.DefaultListModel
 import javax.swing.JList
 
 @Suppress("unused")
-open class DroppableList : JList<Any?>(), DropTargetListener, DragSourceListener, DragGestureListener {
+open class DroppableList : JList<Any>(), DropTargetListener, DragSourceListener, DragGestureListener {
 
     var dragSource: DragSource = DragSource.getDefaultDragSource()
 
     init {
         dropTarget = DropTarget(this, this)
         dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, this)
-        model = DefaultListModel<Any?>()
+        model = DefaultListModel<Any>()
     }
 
     override fun dragDropEnd(DragSourceDropEvent: DragSourceDropEvent?) {

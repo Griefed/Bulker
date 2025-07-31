@@ -55,9 +55,10 @@ class BulkerKt : Bulker() {
     }
 
     private fun addListeners() {
-
         inputSearchTextField.document.addDocumentListener(docListener)
         outputReplaceTextField.document.addDocumentListener(docListener)
+        inputMaskTextField.document.addDocumentListener(docListener)
+        outputMaskTextField.document.addDocumentListener(docListener)
         inputFileList.model.addListDataListener(object : ListDataListener {
             override fun intervalAdded(e: ListDataEvent?) {
                 refreshOutputFileList()
@@ -89,7 +90,13 @@ class BulkerKt : Bulker() {
                 JOptionPane.WARNING_MESSAGE
             )
             if (result == JOptionPane.YES_OPTION) {
-                val renamed = renameFiles(inputSearchTextField.text, outputReplaceTextField.text, getFileList())
+                val renamed = renameFiles(
+                    inputSearchTextField.text,
+                    outputReplaceTextField.text,
+                    getFileList(),
+                    getIncludeMask(),
+                    getExcludeMask()
+                )
                 JOptionPane.showMessageDialog(
                     frame,
                     """
@@ -115,10 +122,13 @@ class BulkerKt : Bulker() {
         }
     }
 
-    fun renameFiles(searchFor: String, replaceWith: String, files: List<File>): MutableList<File> {
+    fun renameFiles(searchFor: String, replaceWith: String, files: List<File>, includeMask: Regex, excludeMask: Regex): MutableList<File> {
         val renamedFiles = ArrayList<File>()
         val parsedFiles = files.filter { file -> file.name.contains(searchFor) }
         for (file in parsedFiles) {
+            if (!file.absolutePath.matches(includeMask) && file.absolutePath.matches(excludeMask)) {
+                continue
+            }
             val oldFile = file.absoluteFile
             val parentPath = file.parentFile.absolutePath
             val fileName = oldFile.name
@@ -164,36 +174,101 @@ class BulkerKt : Bulker() {
     }
 
     fun countPotentialRenames(): Int {
-        val inputModel = inputFileList.model as DefaultListModel<Any>
-        val inputIterator: MutableIterator<Any> = inputModel.elements().asIterator()
-        var counter = 0
-        while (inputIterator.hasNext()) {
-            val hashtable = inputIterator.next() as Hashtable<Any, Any>
-            val oldFilename = hashtable["name"].toString()
-            if (oldFilename.contains(inputSearchTextField.text)) {
-                counter++
-            }
-        }
-        return counter
+        return getOutputFilenames().size
     }
 
     fun refreshOutputFileList() {
-        val inputModel = inputFileList.model as DefaultListModel<Any>
         val outputModel = outputFileList.model as DefaultListModel<Any>
+        val outputFileNames = getOutputFilenames()
+
+        outputModel.clear()
+        outputModel.addAll(outputFileNames)
+        outputFileList.setModel(outputModel)
+    }
+
+    fun getOutputFilenames(): List<String> {
+        val inputModel = inputFileList.model as DefaultListModel<Any>
         val inputIterator = inputModel.elements().asIterator()
-        val inputFileNames = mutableListOf<String>()
+        val outputFileNames = mutableListOf<String>()
+        val includeMask = getIncludeMask()
+        val excludeMask = getExcludeMask()
 
         while (inputIterator.hasNext()) {
             val hashtable = inputIterator.next() as Hashtable<Any, Any>
             val oldFilename = hashtable["name"].toString()
             val oldFilepath = hashtable["path"].toString()
-            val newFilename = oldFilename.replace(inputSearchTextField.text, outputReplaceTextField.text)
-            val newFilepath = oldFilepath.substring(0, oldFilepath.length - oldFilename.length) + newFilename
-            inputFileNames.add("$newFilename ==> $newFilepath")
+
+            if (oldFilepath.matches(includeMask) && !oldFilepath.matches(excludeMask)) {
+                val newFilename = oldFilename.replace(inputSearchTextField.text, outputReplaceTextField.text)
+                val newFilepath = oldFilepath.substring(0, oldFilepath.length - oldFilename.length) + newFilename
+                outputFileNames.add("$newFilename ==> $newFilepath")
+            }
         }
 
-        outputModel.clear()
-        outputModel.addAll(inputFileNames)
-        outputFileList.setModel(outputModel)
+        return outputFileNames.toList()
+    }
+
+    fun compileMask(string: String): Regex {
+        return string.toRegex()
+    }
+
+    fun getIncludeMask(): Regex {
+        return if (inputMaskTextField.text.isNotEmpty()) {
+            compileMask(inputMaskTextField.text)
+        } else {
+            compileMask(".*")
+        }
+    }
+
+    fun getIncludeMask(args: Array<String>): Regex {
+        val searchPos = args.indexOf("--include-mask")
+        return compileMask(args[searchPos + 1])
+    }
+
+    fun getExcludeMask(): Regex {
+        return if (outputMaskTextField.text.isNotEmpty()) {
+            compileMask(outputMaskTextField.text)
+        } else {
+            compileMask("You're in trouble, program. Why don't you make it easy on yourself. --END OF LINE--")
+        }
+    }
+
+    fun getExcludeMask(args: Array<String>): Regex {
+        val searchPos = args.indexOf("--exclude-mask")
+        return compileMask(args[searchPos + 1])
+    }
+
+    fun getSearchFor(args: Array<String>): String {
+        val searchPos = args.indexOf("--search")
+        return args[searchPos + 1]
+    }
+
+    fun getReplaceWith(args: Array<String>): String {
+        val searchPos = args.indexOf("--replace")
+        return args[searchPos + 1]
+    }
+
+    fun getInputs(args: Array<String>): List<File> {
+        val files = mutableListOf<File>()
+        val inputPositions = mutableListOf<Int>()
+        for (i in args.indices) {
+            if (args[i] == "--input") {
+                inputPositions.add(i + 1)
+            }
+        }
+        for (i in inputPositions) {
+            val file = File(args[i])
+            if (file.isFile) {
+                files.add(file)
+            }
+            if (file.isDirectory) {
+                file.walk(FileWalkDirection.TOP_DOWN).forEach { walked ->
+                    if (walked.isFile) {
+                        files.add(walked)
+                    }
+                }
+            }
+        }
+        return files
     }
 }

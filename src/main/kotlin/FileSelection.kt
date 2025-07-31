@@ -9,7 +9,7 @@ import java.io.StringReader
 import java.util.*
 
 class FileSelection(file: File?) : Vector<Any?>(), Transferable {
-    var flavors: Array<DataFlavor?>? =
+    var flavors: Array<DataFlavor> =
         arrayOf(DataFlavor.javaFileListFlavor, DataFlavor.stringFlavor, DataFlavor.plainTextFlavor)
 
     init {
@@ -18,16 +18,16 @@ class FileSelection(file: File?) : Vector<Any?>(), Transferable {
 
     /* Returns the array of flavors in which it can provide the data. */
     @Synchronized
-    override fun getTransferDataFlavors(): Array<DataFlavor?>? {
+    override fun getTransferDataFlavors(): Array<DataFlavor> {
         return flavors
     }
 
     /* Returns whether the requested flavor is supported by this object. */
     override fun isDataFlavorSupported(flavor: DataFlavor): Boolean {
         var b = false
-        b = b or flavor.equals(flavors!![FILE])
-        b = b or flavor.equals(flavors!![STRING])
-        b = b or flavor.equals(flavors!![PLAIN])
+        b = b or flavor.equals(flavors[FILE])
+        b = b or flavor.equals(flavors[STRING])
+        b = b or flavor.equals(flavors[PLAIN])
         return (b)
     }
 
@@ -38,12 +38,12 @@ class FileSelection(file: File?) : Vector<Any?>(), Transferable {
     @Synchronized
     @Throws(UnsupportedFlavorException::class, IOException::class)
     override fun getTransferData(flavor: DataFlavor): Any {
-        if (flavor.equals(flavors!![FILE])) {
-            return this
-        } else if (flavor.equals(flavors!![PLAIN])) {
-            return StringReader((elementAt(0) as File).absolutePath)
-        } else if (flavor.equals(flavors!![STRING])) {
-            return (elementAt(0) as File).absolutePath
+        return if (flavor.equals(flavors[FILE])) {
+            this
+        } else if (flavor.equals(flavors[PLAIN])) {
+            StringReader((elementAt(0) as File).absolutePath)
+        } else if (flavor.equals(flavors[STRING])) {
+            (elementAt(0) as File).absolutePath
         } else {
             throw UnsupportedFlavorException(flavor)
         }

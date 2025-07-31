@@ -23,6 +23,27 @@ public class Bulker {
     private JPanel controlPanel;
     private JDroppableList inputFileList;
 
+    public JTextField getInputMaskTextField() {
+        return inputMaskTextField;
+    }
+
+    public JLabel getInputMaskLabel() {
+        return inputMaskLabel;
+    }
+
+    public JLabel getOutputMaskLabel() {
+        return outputMaskLabel;
+    }
+
+    public JTextField getOutputMaskTextField() {
+        return outputMaskTextField;
+    }
+
+    private JTextField inputMaskTextField;
+    private JLabel inputMaskLabel;
+    private JLabel outputMaskLabel;
+    private JTextField outputMaskTextField;
+
     protected JPanel getApplicationPanel() {
         return applicationPanel;
     }
