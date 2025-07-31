@@ -5,6 +5,8 @@ The bulk file-renamer.
 Yes, files from directories are added recursively. Yes, all files from all contained directories of the dropped sources.
 No Patrick, Mayonnaise is not an instrument.
 
+Download the latest *Bulker-VERSION-all.jar* version from: https://github.com/Griefed/Bulker/releases/latest
+
 ![screenshot.png](screenshot.png)
 
 ## How-To-Use
